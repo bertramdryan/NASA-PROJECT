@@ -4,22 +4,14 @@ const path = require('path');
 const morgan = require('morgan');
 
 const planetsRouter = require('./routes/planets/planets.router');
+const launchesRouter = require('./routes/launches/launches.router');
 
 
 const app = express();
 
 const whiteList = ['http://localhost:3000']
 
-app.use(cors({
-        origin: (origin, callback) => {
-        if (whiteList.indexOf(origin) !== -1 || !origin) {
-                callback(null, true)
-            } else {
-                callback(new Error('Not allowed by CORS'));
-            }
-        }
-    })
-);
+app.use(cors({origin: '*'}));
 
 app.use(morgan('combined'));
 
@@ -27,10 +19,10 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-app.use(planetsRouter)
-app.get('/', (req, res) => {
-    // console.log(__dirname);
-    // res.sendFile(path.join(__dirname, '..','public', 'build' ,'index.html'));
+app.use('/planets', planetsRouter);
+app.use('/launches', launchesRouter);
+app.get('/*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..','public' ,'index.html'));
 });
 
 module.exports = app;

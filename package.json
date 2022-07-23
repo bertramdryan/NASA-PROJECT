@@ -6,11 +6,11 @@
   "scripts": {
     "install-server": "npm i --prefix server",
     "install-client": "npm i --prefix client",
-    "install": "npm-run-all --parallel install-server install-client",
+    "install": "npm run install-server && npm run install-client",
     "server": "npm run watch --prefix server",
     "client": "npm start --prefix client",
     "watch": "npm-run-all --parallel server client",
-    "deploy": "npm run build --prefix client && npm run postbuild --prefix client && npm start --prefix server",
+    "deploy": "npm run build --prefix client && npm start --prefix server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
