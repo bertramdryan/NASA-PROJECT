@@ -1,21 +1,27 @@
-const { existsLaunchWithId, 
-        getAllLaunches, 
-        abortLaunchById, 
-        scheduleNewLaunch} = require("../../models/launches.model");
+const { existsLaunchWithId,
+    getAllLaunches,
+    abortLaunchById,
+    scheduleNewLaunch } = require("../../models/launches.model");
+const { getPagination } = require("../../services/query");
+
 
 async function httpGetAllLaunches(req, res) {
-    return res.status(200).json(await getAllLaunches());
+    const { skip, limit } = getPagination(req.query);
+    const launches = await getAllLaunches(skip, limit);
+    return res.status(200).json(launches);
 }
 
 async function httpPostNewLaunch(req, res) {
     const launch = req.body;
 
+    console.log(launch);
+
     if (!launch.mission || !launch.rocket || !launch.launchDate
         || !launch.target) {
-            return res.status(400).json({
-                error: 'Missing required launch property'
-            });
-        }
+        return res.status(400).json({
+            error: 'Missing required launch property'
+        });
+    }
 
     launch.launchDate = new Date(launch.launchDate);
 
@@ -29,17 +35,29 @@ async function httpPostNewLaunch(req, res) {
     res.status(201).json(launch);
 }
 
-function httpAbortLaunch(req, res) {
-    const launchId =  Number(req.params.id);
-    if (!existsLaunchWithId(launchId)) {
+async function httpAbortLaunch(req, res) {
+    const launchId = Number(req.params.id);
+
+    console.log(launchId);
+
+    const existsLaunch = await existsLaunchWithId(launchId);
+
+    console.log(existsLaunch);
+    if (!existsLaunch) {
         return res.status(404).json({
             error: `Launch with LaunchId: ${launchId}, could not be found.`
         });
     }
 
-    const aborted = abortLaunchById(launchId);
+    const aborted = await abortLaunchById(launchId);
 
-    return res.status(200).json(aborted);
+    if (!aborted) {
+        return res.status(400).json({
+            error: 'launch not aborted'
+        });
+    }
+
+    return res.status(200).json({ ok: true });
 }
 
 module.exports = {
